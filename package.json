@@ -1,0 +1,17 @@
+{
+    "name": "song-protocol-sdk",
+    "version": "0.0.1",
+    "type": "module",
+    "scripts": {
+        "test": "jest"
+    },
+    "dependencies": {
+        "web3": "^4.8.0"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.24.5",
+        "@babel/preset-env": "^7.24.5",
+        "babel-jest": "^29.7.0",
+        "jest": "^29.7.0"
+    }
+}
