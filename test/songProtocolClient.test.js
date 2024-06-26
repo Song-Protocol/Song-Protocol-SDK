@@ -22,3 +22,11 @@ test('it should send transaction', async () => {
     // You can see transaction here: https://testnet-explorer.songprotocol.org/tx/{$transactionHash}
     // ex. https://testnet-explorer.songprotocol.org/tx/0x24cafcb9529b19d18d9d032adfcf06778f9e6f13e1d5a090802c353e78225221
 });
+
+test('it should register copyright', async () => {
+    const uri = 'https://app-stage.songprotocol.org/copyrights/3/metadata';
+    const name = 'Neon Freedom';
+    const addresses = ["0x17cbD516166720b8c75fE75235Ed0218d9CFDFbe", "0xCc31A7903D1a75CD7037EEeB5243C861580BF269", "0x6EdD8fA5550E29D47641F969d2eAD3DecAA29BA2"];
+    const shares = [85, 10, 5];
+    const txReceipt = await client.copyrightRegister(testPrivateKey, uri, name, addresses, shares);
+});
