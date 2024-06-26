@@ -2,6 +2,7 @@
     "name": "song-protocol-sdk",
     "version": "0.0.1",
     "type": "module",
+    "main": "./src/songProtocolClient.js",
     "scripts": {
         "test": "jest"
     },
