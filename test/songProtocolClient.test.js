@@ -1,6 +1,6 @@
 import SongProtocolClient from '../src/songProtocolClient.js';
 
-const client = new SongProtocolClient('https://testnet-rpc.songprotocol.org');
+const client = new SongProtocolClient('https://testnet-rpc.songprotocol.org', '0xD141e6E7667Ebe4F6c53ff63351C0d06a1C770e5');
 
 const testAddress = '0x12C5CaA7615FC16D3326e6C3083dc55AFF8D68b9';
 const testPrivateKey = '0xaf4f3045c8e0706d7c8516c5e865a5f0621c6745c53394e5d18d508cdc29eccd';
@@ -29,4 +29,6 @@ test('it should register copyright', async () => {
     const addresses = ["0x17cbD516166720b8c75fE75235Ed0218d9CFDFbe", "0xCc31A7903D1a75CD7037EEeB5243C861580BF269", "0x6EdD8fA5550E29D47641F969d2eAD3DecAA29BA2"];
     const shares = [85, 10, 5];
     const txReceipt = await client.copyrightRegister(testPrivateKey, uri, name, addresses, shares);
+
+    console.log(txReceipt);
 });

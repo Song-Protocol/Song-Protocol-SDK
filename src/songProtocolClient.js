@@ -68,9 +68,10 @@ class SongProtocolClient {
     async copyrightRegister(privateKey, uri, name, addresses, shares) {
         const account = this.web3.eth.accounts.privateKeyToAccount(privateKey);
         const transaction = this.copyrightContract.methods.mint(uri, name, addresses, shares);
+
         const options = {
             from    : account.address,
-            to      : account.address,
+            to      : this.copyrightContract._address,
             data    : transaction.encodeABI(),
             gasPrice: await this.web3.eth.getGasPrice(),
         };
