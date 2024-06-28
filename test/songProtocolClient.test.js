@@ -2,7 +2,6 @@ import SongProtocolClient from '../src/songProtocolClient.js';
 
 const client = new SongProtocolClient(
     'https://testnet-rpc.songprotocol.org',
-    '880660990',
     '0xD141e6E7667Ebe4F6c53ff63351C0d06a1C770e5'
 );
 

@@ -1,103 +1,85 @@
-import { Web3 } from 'web3';
-import { createPublicClient, http, defineChain } from 'viem';
-import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
+import { ethers } from 'ethers';
 
 class SongProtocolClient {
-    constructor(rpcUrl, networkId, copyrightAddress) {
-        const songProtocolChain = defineChain({
-            id: networkId,
-            name: 'Song Protocol',
-            rpcUrls: {
-                default: {
-                  http: [rpcUrl],
-                },
-            },
-        });
+    constructor(rpcUrl, copyrightAddress) {
 
-        this.viemClient = createPublicClient({
-            chain: songProtocolChain,
-            transport: http(rpcUrl),
-        });
+        this.provider = new ethers.JsonRpcProvider(rpcUrl);
 
-        this.web3 = new Web3(rpcUrl);
-        // testnet: https://testnet-rpc.songprotocol.org
-        this.web3 = new Web3(rpcUrl);
-        this.copyrightContract = new this.web3.eth.Contract([
-            {
-                "inputs": [
-                    {
-                        "internalType": "string",
-                        "name": "uri_",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "name_",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "address[]",
-                        "name": "shareholders",
-                        "type": "address[]"
-                    },
-                    {
-                        "internalType": "uint16[]",
-                        "name": "counts",
-                        "type": "uint16[]"
-                    }
-                ],
-                "name": "mint",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            }
-        ], copyrightAddress);
+        this.copyrightContract = new ethers.Contract(
+            copyrightAddress,
+            [
+                {
+                    "inputs": [
+                        {
+                            "internalType": "string",
+                            "name": "uri_",
+                            "type": "string"
+                        },
+                        {
+                            "internalType": "string",
+                            "name": "name_",
+                            "type": "string"
+                        },
+                        {
+                            "internalType": "address[]",
+                            "name": "shareholders",
+                            "type": "address[]"
+                        },
+                        {
+                            "internalType": "uint16[]",
+                            "name": "counts",
+                            "type": "uint16[]"
+                        }
+                    ],
+                    "name": "mint",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                }
+            ],
+            this.provider
+        );
     }
 
     async createAccount() {
-        const privateKey = generatePrivateKey();
-        const account = privateKeyToAccount(privateKey);
-        account.privateKey = privateKey;
+        const account = ethers.Wallet.createRandom();
         return account;
     }
 
     async getBalance(address) {
-        const balance = await this.viemClient.getBalance({ address });
+        const balance = this.provider.getBalance(address);
         return balance;
     }
 
     async sendTransaction(privateKey, toAddress, nativeTokenAmount, data) {
-        const account = privateKeyToAccount(privateKey);
+
+        const wallet = new ethers.Wallet(privateKey, this.provider);
+
+        const dataUtf8Bytes = ethers.toUtf8Bytes(data);
+        const dataHexString = ethers.hexlify(dataUtf8Bytes);
 
         let options = {
-            from: account.address,
             to: toAddress,
             value: nativeTokenAmount,
-            data: this.web3.utils.utf8ToHex(data),
-            gasPrice: await this.web3.eth.getGasPrice(),
+            data: dataHexString,
+            gasPrice: (await this.provider.getFeeData()).gasPrice,
         };
 
-        const signedTransaction = await this.web3.eth.accounts.signTransaction(options, privateKey);
-
-        const txReceipt = await this.web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
+        const transactionResponse = await wallet.sendTransaction(options);
+        const txReceipt = await transactionResponse.wait();
 
         return txReceipt;
     }
 
     async copyrightRegister(privateKey, uri, name, addresses, shares) {
-        const account = this.web3.eth.accounts.privateKeyToAccount(privateKey);
-        const transaction = this.copyrightContract.methods.mint(uri, name, addresses, shares);
 
-        const options = {
-            from    : account.address,
-            to      : this.copyrightContract._address,
-            data    : transaction.encodeABI(),
-            gasPrice: await this.web3.eth.getGasPrice(),
-        };
+        const wallet = new ethers.Wallet(privateKey, this.provider);
 
-        const signedTransaction = await this.web3.eth.accounts.signTransaction(options, account.privateKey);
+        const contractWithSigner = this.copyrightContract.connect(wallet);
 
-        const txReceipt = await this.web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
+        const transaction = await contractWithSigner.mint(uri, name, addresses, shares);
+
+        const txReceipt = await transaction.wait();
 
         return txReceipt;
     }

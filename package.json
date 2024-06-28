@@ -7,8 +7,7 @@
         "test": "jest"
     },
     "dependencies": {
-        "viem": "^2.16.3",
-        "web3": "^4.8.0"
+        "ethers": "^6.13.1"
     },
     "devDependencies": {
         "@babel/core": "^7.24.5",
