@@ -1,6 +1,10 @@
 import SongProtocolClient from '../src/songProtocolClient.js';
 
-const client = new SongProtocolClient('https://testnet-rpc.songprotocol.org', '0xD141e6E7667Ebe4F6c53ff63351C0d06a1C770e5');
+const client = new SongProtocolClient(
+    'https://testnet-rpc.songprotocol.org',
+    '880660990',
+    '0xD141e6E7667Ebe4F6c53ff63351C0d06a1C770e5'
+);
 
 const testAddress = '0x12C5CaA7615FC16D3326e6C3083dc55AFF8D68b9';
 const testPrivateKey = '0xaf4f3045c8e0706d7c8516c5e865a5f0621c6745c53394e5d18d508cdc29eccd';

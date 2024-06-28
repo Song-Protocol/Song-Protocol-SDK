@@ -1,7 +1,24 @@
 import { Web3 } from 'web3';
+import { createPublicClient, http, defineChain } from 'viem';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
 class SongProtocolClient {
-    constructor(rpcUrl, copyrightAddress) {
+    constructor(rpcUrl, networkId, copyrightAddress) {
+        const songProtocolChain = defineChain({
+            id: networkId,
+            name: 'Song Protocol',
+            rpcUrls: {
+                default: {
+                  http: [rpcUrl],
+                },
+            },
+        });
+
+        this.viemClient = createPublicClient({
+            chain: songProtocolChain,
+            transport: http(rpcUrl),
+        });
+
         this.web3 = new Web3(rpcUrl);
         // testnet: https://testnet-rpc.songprotocol.org
         this.web3 = new Web3(rpcUrl);
@@ -38,17 +55,19 @@ class SongProtocolClient {
     }
 
     async createAccount() {
-        const account = await this.web3.eth.accounts.create();
+        const privateKey = generatePrivateKey();
+        const account = privateKeyToAccount(privateKey);
+        account.privateKey = privateKey;
         return account;
     }
 
     async getBalance(address) {
-        const balance = await this.web3.eth.getBalance(address);
+        const balance = await this.viemClient.getBalance({ address });
         return balance;
     }
 
     async sendTransaction(privateKey, toAddress, nativeTokenAmount, data) {
-        const account = this.web3.eth.accounts.privateKeyToAccount(privateKey);
+        const account = privateKeyToAccount(privateKey);
 
         let options = {
             from: account.address,
@@ -58,7 +77,7 @@ class SongProtocolClient {
             gasPrice: await this.web3.eth.getGasPrice(),
         };
 
-        const signedTransaction = await this.web3.eth.accounts.signTransaction(options, account.privateKey);
+        const signedTransaction = await this.web3.eth.accounts.signTransaction(options, privateKey);
 
         const txReceipt = await this.web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
 
